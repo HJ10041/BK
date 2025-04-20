@@ -35,3 +35,5 @@ plt.show()
 
 # 8. 결과 확인
 print(data.tail())
+
+data.to_excel(r'C:\Users\ann\Desktop\BK\data.xlsx')
