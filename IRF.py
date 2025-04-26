@@ -1,6 +1,6 @@
-save_dir = r'C:\Users\ann\Desktop\BK'  # ¿˙¿Â ∞Ê∑Œ
+save_dir = r'C:\Users\ann\Desktop\BK'  # Ï†ÄÏû• Í≤ΩÎ°ú
 
-### 1. Ω«¡¶ µ•¿Ã≈Õ ±‚π› IRF
+### 1. Ïã§Ï†ú Îç∞Ïù¥ÌÑ∞ Í∏∞Î∞ò IRF
 model = VAR(data)
 results = model.fit(1)
 irf_actual = results.irf(10)
@@ -10,7 +10,7 @@ plt.tight_layout()
 fig1.savefig(f'{save_dir}\\irf_actual.png')
 plt.close()
 
-### 2. BK ¡∂∞« ∏∏¡∑ A (1 unstable eigenvalue)
+### 2. BK Ï°∞Í±¥ ÎßåÏ°± A (1 unstable eigenvalue)
 A_bk = np.array([[0.7, 0.2], [0.3, 1.1]])
 n_periods = 50
 np.random.seed(0)
@@ -30,7 +30,7 @@ plt.tight_layout()
 fig2.savefig(f'{save_dir}\\irf_bk_satisfied.png')
 plt.close()
 
-### 3. BK ¡∂∞« ¿ßπ› A (2 unstable eigenvalues °Ê no solution)
+### 3. BK Ï°∞Í±¥ ÏúÑÎ∞ò A (2 unstable eigenvalues ‚Üí no solution)
 A_nosol = np.array([[1.2, 0.4], [0.3, 1.1]])
 np.random.seed(1)
 x_nosol = np.zeros((n_periods, 2))

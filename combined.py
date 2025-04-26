@@ -186,3 +186,76 @@ plt.suptitle('IRF from Artificial A (BK NO SOLUTION)')
 plt.tight_layout()
 fig3.savefig(f'{save_dir}\\irf_bk_no_solution.png')
 plt.close()
+
+# 1. 인위적으로 불안정한 A 행렬 설계 (실험 목적)
+A_nosol = np.array([
+    [2, 0.8],
+    [0.6, 2.5]
+])
+
+# 2. 시뮬레이션
+n_periods = 50
+np.random.seed(42)
+x_nosol = np.zeros((n_periods, 2))
+shock = np.random.normal(size=(n_periods, 2)) * 0.1
+
+for t in range(1, n_periods):
+    x_nosol[t] = A_nosol @ x_nosol[t-1] + shock[t]
+
+sim_data = pd.DataFrame(x_nosol, columns=['output_gap', 'YoY_inflation'])
+
+# 3. VAR 추정
+model = VAR(sim_data)
+results = model.fit(1)
+
+# 4. BK 조건 체크
+num_fwd = 1  # forward-looking variable 수
+A_est = results.coefs[0]
+eigvals = np.linalg.eigvals(A_est)
+moduli = np.abs(eigvals)
+num_unstable = np.sum(moduli > 1)
+
+print("Estimated A matrix:\n", A_est)
+print("Eigenvalues:", eigvals)
+print(f"Unstable eigenvalues: {num_unstable}, Forward-looking vars: {num_fwd}")
+
+# 5. BK 조건 위반 여부에 따라 IRF 처리
+if num_unstable > num_fwd:
+    print("❌ BK condition violated – NO SOLUTION (system is explosive)")
+else:
+    try:
+        print("✅ BK condition ok – generating IRF")
+        irf = results.irf(10)
+        fig = irf.plot(orth=False)
+        plt.suptitle('IRF (BK condition OK or indeterminate)')
+        plt.tight_layout()
+        fig.savefig(r'C:\Users\ann\Desktop\BK\irf_checked.png')
+        plt.show()
+    except np.linalg.LinAlgError as e:
+        print("❌ IRF computation failed due to singular matrix:", e)
+
+if num_unstable > num_fwd:
+    print("❌ BK condition violated – NO SOLUTION (system is explosive)")
+else:
+    print("✅ BK condition ok – generating IRF")
+    irf = results.irf(10)  
+    fig = irf.plot(orth=False)
+    plt.suptitle('IRF (BK condition OK or indeterminate)')
+    plt.tight_layout()
+    fig.savefig(r'C:\Users\ann\Desktop\BK\irf_checked.png')
+    plt.show()
+
+# 4. 고유값 확인
+A_est = results.coefs[0]
+eigvals = np.linalg.eigvals(A_est)
+print("Estimated A matrix:")
+print(A_est)
+print("Eigenvalues:", eigvals)
+
+# 5. IRF 계산 및 저장
+irf = results.irf(10)
+fig = irf.plot(orth=False)
+plt.suptitle('IRF from Strongly Unstable A (BK Violated: NO SOLUTION)')
+plt.tight_layout()
+fig.savefig(r'C:\Users\ann\Desktop\BK\irf_bk_strong_nosolution.png')
+plt.show()
