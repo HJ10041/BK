@@ -1,39 +1,39 @@
-import pandas as pd
+ï»¿import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from pandas_datareader import data as pdr
 import datetime
 
-# 1. ³¯Â¥ ¼³Á¤
+# 1. ë‚ ì§œ ì„¤ì •
 start = datetime.datetime(2000, 1, 1)
 end = datetime.datetime.today()
 
-# 2. FRED µ¥ÀÌÅÍ ºÒ·¯¿À±â
-gdp = pdr.DataReader('GDPC1', 'fred', start, end)         # ½ÇÁú GDP
-pot_gdp = pdr.DataReader('GDPPOT', 'fred', start, end)    # ÀáÀç GDP
-pce = pdr.DataReader('PCEPILFE', 'fred', start, end)      # Core PCE Áö¼ö
+# 2. FRED ë°ì´í„° ë¶ˆëŸ¬ì˜¤ê¸°
+gdp = pdr.DataReader('GDPC1', 'fred', start, end)         # ì‹¤ì§ˆ GDP
+pot_gdp = pdr.DataReader('GDPPOT', 'fred', start, end)    # ì ì¬ GDP
+pce = pdr.DataReader('PCEPILFE', 'fred', start, end)      # Core PCE ì§€ìˆ˜
 
-# 3. logº¯È¯
+# 3. logë³€í™˜
 gdp['log_gdp'] = np.log(gdp['GDPC1'])
 pot_gdp['log_pot'] = np.log(pot_gdp['GDPPOT'])
 
-# 4. output gap °è»ê: log GDP - log POT
+# 4. output gap ê³„ì‚°: log GDP - log POT
 output_gap = gdp['log_gdp'] - pot_gdp['log_pot']
 output_gap.name = 'output_gap'
 
-# 5. YoY ÀÎÇÃ·¹ÀÌ¼Ç °è»ê (quarterly ±âÁØ 4ºĞ±â Â÷ÀÌ)
+# 5. YoY ì¸í”Œë ˆì´ì…˜ ê³„ì‚° (quarterly ê¸°ì¤€ 4ë¶„ê¸° ì°¨ì´)
 pce['YoY_inflation'] = pce['PCEPILFE'].pct_change(periods=4) * 100
 
-# 6. µ¥ÀÌÅÍ ÅëÇÕ
+# 6. ë°ì´í„° í†µí•©
 data = pd.concat([output_gap, pce['YoY_inflation']], axis=1).dropna()
 
-# 7. ½Ã°¢È­ (¼±ÅÃÀû)
+# 7. ì‹œê°í™” (ì„ íƒì )
 data.plot(title='Output Gap and YoY Core PCE Inflation', figsize=(10, 4), grid=True)
 plt.ylabel('Output Gap / Inflation (%)')
 plt.tight_layout()
 plt.show()
 
-# 8. °á°ú È®ÀÎ
+# 8. ê²°ê³¼ í™•ì¸
 print(data.tail())
 
 data.to_excel(r'C:\Users\ann\Desktop\BK\data.xlsx')
@@ -42,21 +42,21 @@ import statsmodels.api as sm
 from statsmodels.tsa.api import VAR
 import matplotlib.pyplot as plt
 
-# 1. VAR ¸ğµ¨ »ı¼º
+# 1. VAR ëª¨ë¸ ìƒì„±
 model = VAR(data)
 
-# 2. VAR(1) ÃßÁ¤
+# 2. VAR(1) ì¶”ì •
 results = model.fit(1)
 
-# 3. A Çà·Ä Ãâ·Â
+# 3. A í–‰ë ¬ ì¶œë ¥
 A = results.coefs[0]
 print("Estimated A matrix:")
 print(A)
 
-# 4. ¿¹Ãø°ª °è»ê (fitted values)
+# 4. ì˜ˆì¸¡ê°’ ê³„ì‚° (fitted values)
 fitted = results.fittedvalues
 
-# 5. ½ÇÁ¦ vs ¿¹Ãø°ª ½Ã°¢È­
+# 5. ì‹¤ì œ vs ì˜ˆì¸¡ê°’ ì‹œê°í™”
 fig, ax = plt.subplots(2, 1, figsize=(10, 6))
 
 # Output Gap
@@ -75,15 +75,15 @@ ax[1].grid(True)
 
 plt.tight_layout()
 
-# 6. ±×·¡ÇÁ ÀúÀå
+# 6. ê·¸ë˜í”„ ì €ì¥
 plt.savefig(r'C:\Users\ann\Desktop\BK\var_fit_results.png')
 plt.show()
 
-# 1. A Çà·Ä ÀúÀå
+# 1. A í–‰ë ¬ ì €ì¥
 A_df = pd.DataFrame(A, columns=data.columns, index=data.columns)
 A_df.to_excel(r'C:\Users\ann\Desktop\BK\A_matrix.xlsx')
 
-# 2. °íÀ¯°ª ÀúÀå
+# 2. ê³ ìœ ê°’ ì €ì¥
 eigvals = np.linalg.eigvals(A)
 moduli = np.abs(eigvals)
 
@@ -93,9 +93,94 @@ eig_df = pd.DataFrame({
 })
 eig_df.to_excel(r'C:\Users\ann\Desktop\BK\eigenvalues.xlsx')
 
-# 3. fitted values ÀúÀå
+# 3. fitted values ì €ì¥
 results.fittedvalues.to_excel(r'C:\Users\ann\Desktop\BK\fitted_values.xlsx')
 
-# 4. VAR È¸±Í¿ä¾à ÀúÀå
+# 4. VAR íšŒê·€ìš”ì•½ ì €ì¥
 with open(r'C:\Users\ann\Desktop\BK\var_summary.txt', 'w') as f:
     f.write(str(results.summary()))
+
+    from statsmodels.tsa.api import VAR
+import numpy as np
+
+# BK ë§Œì¡±í•˜ëŠ” VAR íƒìƒ‰
+max_p = 10  # ìµœëŒ€ ì‹œì°¨ p=10ê¹Œì§€ ì‹œë„
+num_forward_looking = 1  # forward-looking ë³€ìˆ˜ ê°œìˆ˜ (ex: inflation)
+
+# 3. ë°˜ë³µ íƒìƒ‰
+found = False
+
+for p in range(1, max_p + 1):
+    try:
+        model = VAR(data)
+        results = model.fit(p)
+        
+        # A_total = coefs[0] + coefs[1] + ... + coefs[p-1]
+        A_total = results.coefs.sum(axis=0)
+        
+        eigvals = np.linalg.eigvals(A_total)
+        moduli = np.abs(eigvals)
+        num_unstable = np.sum(moduli > 1)
+        
+        print(f"p = {p}, unstable eigenvalues = {num_unstable}")
+
+        if num_unstable == num_forward_looking:
+            print(f"\nâœ… BK condition satisfied at p = {p}!")
+            found = True
+            break
+
+    except Exception as e:
+        print(f"Error at p = {p}: {e}")
+        continue
+
+if not found:
+    print("\nâŒ No p found satisfying BK condition up to p =", max_p)
+
+### 1. í˜„ì¬ ë°ì´í„°ë¡œ VAR(1) ì¶”ì •í•˜ê³  IRF ì €ì¥
+
+# VAR(1) ì¶”ì •
+model = VAR(data)
+results = model.fit(1)
+
+# IRF ê³„ì‚°
+irf_actual = results.irf(10)
+
+# IRF ê·¸ë¦¬ê¸° ë° ì €ì¥
+fig1 = irf_actual.plot(orth=False)
+plt.suptitle('IRF from Actual Estimated A (BK NOT satisfied)')
+plt.tight_layout()
+fig1.savefig(r'C:\Users\ann\Desktop\BK\irf_actual.png')
+plt.show()
+
+### 2. BK ì¡°ê±´ ë§Œì¡±í•˜ëŠ” ì¸ìœ„ì  A ë§Œë“¤ê³  IRF ì €ì¥
+
+# BK ì¡°ê±´ ë§Œì¡± A ì„¤ì •
+A_bk = np.array([
+    [0.7, 0.2],
+    [0.3, 1.1]
+])
+
+# ì¸ìœ„ì  ë°ì´í„° ì‹œë®¬ë ˆì´ì…˜
+n_periods = 50
+np.random.seed(0)
+x_simulated = np.zeros((n_periods, 2))
+shock = np.random.normal(size=(n_periods, 2)) * 0.1
+
+for t in range(1, n_periods):
+    x_simulated[t] = A_bk @ x_simulated[t-1] + shock[t]
+
+# ì‹œë®¬ë ˆì´ì…˜ ë°ì´í„°ë¡œ VAR(1) ì¶”ì •
+simulated_data = pd.DataFrame(x_simulated, columns=['output_gap', 'YoY_inflation'])
+
+model_sim = VAR(simulated_data)
+results_sim = model_sim.fit(1)
+
+# IRF ê³„ì‚°
+irf_bk = results_sim.irf(10)
+
+# IRF ê·¸ë¦¬ê¸° ë° ì €ì¥
+fig2 = irf_bk.plot(orth=False)
+plt.suptitle('IRF from Artificial BK-satisfied A')
+plt.tight_layout()
+fig2.savefig(r'C:\Users\ann\Desktop\BK\irf_bk_satisfied.png')
+plt.show()
